@@ -275,4 +275,20 @@
   .animate-shooting-star-3 {
     animation: shooting-star-3 20s linear infinite;
   }
+
+  /* pixar-style bouncing r animation */
+  @keyframes bounce-r {
+    0%, 100% {
+      transform: rotate(6deg) translateY(3px);
+    }
+    50% {
+      transform: rotate(10deg) translateY(3px);
+    }
+  }
+
+  .animate-bounce-r {
+    display: inline-block;
+    animation: bounce-r 2s ease-in-out infinite;
+    transform-origin: center center;
+  }
 }

@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  REACTION_ICONS,
+  getReactionIconByToken,
+  getReactionTokenFromIconKey,
+} from "./reaction-icons";
 
 type EmojiPickerProps = {
   onSelect: (emoji: string) => void;
@@ -9,49 +14,70 @@ type EmojiPickerProps = {
 
 type EmojiCategory = {
   name: string;
-  emojis: string[];
+  items: ReactionPickerItem[];
 };
+
+type ReactionPickerItem = {
+  value: string;
+  label: string;
+  keywords: string[];
+};
+
+const toEmojiItems = (emojis: string[]): ReactionPickerItem[] =>
+  emojis.map((emoji) => ({
+    value: emoji,
+    label: emoji,
+    keywords: [emoji],
+  }));
 
 const EMOJI_CATEGORIES: EmojiCategory[] = [
   {
     name: "Frequently used",
-    emojis: ["👍", "❤️", "😂", "🔥", "✅", "🎉", "👏", "💯"],
+    items: toEmojiItems(["👍", "❤️", "😂", "🔥", "✅", "🎉", "👏", "💯"]),
+  },
+  {
+    name: "Funny icons",
+    items: REACTION_ICONS.map((icon) => ({
+      value: getReactionTokenFromIconKey(icon.key),
+      label: icon.label,
+      keywords: [icon.label, ...icon.keywords],
+    })),
   },
   {
     name: "Smileys",
-    emojis: [
+    items: toEmojiItems([
       "😀", "😃", "😄", "😁", "😊", "😇", "🙂", "🙃",
       "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚",
       "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓",
       "😎", "🥸", "🤩", "🥳", "😏", "😒", "😞", "😔",
       "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩",
       "🥺", "😢", "😭", "😤", "😠", "😡", "🤬", "🤯",
-    ],
+    ]),
   },
   {
     name: "Gestures",
-    emojis: [
+    items: toEmojiItems([
       "👍", "👎", "👊", "✊", "🤛", "🤜", "🤞", "✌️",
       "🤟", "🤘", "👌", "🤌", "🤏", "👈", "👉", "👆",
       "👇", "☝️", "👋", "🤚", "🖐️", "✋", "🖖", "👏",
       "🙌", "👐", "🤲", "🤝", "🙏", "✍️", "💪", "🦾",
-    ],
+    ]),
   },
   {
     name: "Hearts",
-    emojis: [
+    items: toEmojiItems([
       "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍",
       "🤎", "💔", "❤️‍🔥", "❤️‍🩹", "💕", "💞", "💓", "💗",
       "💖", "💘", "💝", "💟",
-    ],
+    ]),
   },
   {
     name: "Symbols",
-    emojis: [
+    items: toEmojiItems([
       "🔥", "⭐", "✨", "💫", "⚡", "💥", "💢", "💯",
       "✅", "❌", "⚠️", "🚫", "💬", "💭", "🗨️", "🗯️",
       "🎉", "🎊", "🎈", "🎁", "🏆", "🥇", "🥈", "🥉",
-    ],
+    ]),
   },
 ];
 
@@ -74,21 +100,26 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
-  const currentEmojis = EMOJI_CATEGORIES[selectedCategory]?.emojis ?? [];
-  const filteredEmojis = searchQuery
-    ? currentEmojis.filter((emoji) => emoji.includes(searchQuery))
-    : currentEmojis;
+  const currentItems = EMOJI_CATEGORIES[selectedCategory]?.items ?? [];
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const filteredItems = normalizedSearch
+    ? currentItems.filter((item) =>
+        [item.value, item.label, ...item.keywords].some((field) =>
+          field.toLowerCase().includes(normalizedSearch),
+        ),
+      )
+    : currentItems;
 
   return (
     <div
       ref={pickerRef}
-      className="absolute bottom-full right-0 mb-2 w-80 rounded-2xl border border-border/70 bg-surface-800 shadow-2xl shadow-black/40 animate-spring overflow-hidden"
+      className="absolute bottom-0 left-full z-50 ml-2 w-80 overflow-hidden rounded-2xl border border-border/70 bg-surface-800 shadow-2xl shadow-black/40 animate-spring"
     >
       {/* search bar */}
       <div className="p-3 border-b border-border/50">
         <input
           type="text"
-          placeholder="Search emoji..."
+          placeholder="Search reactions..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full px-3 py-2 bg-stage-900 border border-border/80 rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary-400/50 focus:border-primary-400/50 transition-all"
@@ -113,24 +144,32 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
         ))}
       </div>
 
-      {/* emoji grid */}
+      {/* reaction grid */}
       <div className="p-3 max-h-64 overflow-y-auto">
-        {filteredEmojis.length > 0 ? (
+        {filteredItems.length > 0 ? (
           <div className="grid grid-cols-8 gap-1">
-            {filteredEmojis.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => onSelect(emoji)}
-                className="rounded-lg p-2 text-2xl transition-all duration-150 btn-press hover:bg-stage-900 hover:scale-110"
-                title={emoji}
-              >
-                {emoji}
-              </button>
-            ))}
+            {filteredItems.map((item) => {
+              const icon = getReactionIconByToken(item.value);
+
+              return (
+                <button
+                  key={item.value}
+                  onClick={() => onSelect(item.value)}
+                  className="rounded-lg p-2 transition-all duration-150 btn-press hover:bg-stage-900 hover:scale-110"
+                  title={item.label}
+                >
+                  {icon ? (
+                    <icon.Icon className="mx-auto size-5 text-text-primary" />
+                  ) : (
+                    <span className="text-2xl">{item.value}</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-8 text-text-muted text-sm">
-            No emojis found
+            No reactions found
           </div>
         )}
       </div>

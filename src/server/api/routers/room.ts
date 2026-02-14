@@ -4,23 +4,7 @@ import { desc, eq, and, lt } from "drizzle-orm";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { reactions, roomPosts, rooms } from "~/server/db/schema";
-
-// helper function to extract youtube video id from various url formats
-function extractYouTubeVideoId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-    /^([a-zA-Z0-9_-]{11})$/,
-  ];
-
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match?.[1]) {
-      return match[1];
-    }
-  }
-
-  return null;
-}
+import { youtubeVideoSchema } from "~/lib/youtube";
 
 export const roomRouter = createTRPCRouter({
   createRoom: publicProcedure
@@ -94,20 +78,18 @@ export const roomRouter = createTRPCRouter({
     .input(
       z.object({
         roomId: z.string(),
-        youtubeUrl: z.string().url(),
+        youtubeUrl: youtubeVideoSchema,
         startTime: z.number().min(0),
         endTime: z.number().min(0).optional(),
         description: z.string().optional(),
         createdBy: z.string().min(1).max(50),
-      }),
+      }).transform(({ youtubeUrl, ...rest }) => ({
+        ...rest,
+        youtubeUrl: youtubeUrl.url,
+        videoId: youtubeUrl.videoId,
+      })),
     )
     .mutation(async ({ ctx, input }) => {
-      const videoId = extractYouTubeVideoId(input.youtubeUrl);
-
-      if (!videoId) {
-        throw new Error("Invalid YouTube URL");
-      }
-
       const endTime = input.endTime ?? input.startTime;
 
       const [post] = await ctx.db
@@ -115,7 +97,7 @@ export const roomRouter = createTRPCRouter({
         .values({
           roomId: input.roomId,
           youtubeUrl: input.youtubeUrl,
-          videoId,
+          videoId: input.videoId,
           startTime: input.startTime,
           endTime,
           description: input.description,

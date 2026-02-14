@@ -108,12 +108,20 @@ export default function RoomPage() {
               </div>
             </div>
 
-            <button
-              onClick={handleShareRoom}
-              className="rounded-2xl bg-primary-500 px-4 py-2 font-semibold text-white btn-press-bright hover-lift"
-            >
-              {copied ? "Copied ✓" : "Share 🔗"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => router.push("/")}
+                className="rounded-2xl border border-border/80 bg-surface-800/80 px-4 py-2 font-semibold text-text-primary btn-press hover-lift"
+              >
+                New Room
+              </button>
+              <button
+                onClick={handleShareRoom}
+                className="rounded-2xl bg-primary-500 px-4 py-2 font-semibold text-white btn-press-bright hover-lift"
+              >
+                {copied ? "Copied ✓" : "Share 🔗"}
+              </button>
+            </div>
           </div>
         </div>
       </header>

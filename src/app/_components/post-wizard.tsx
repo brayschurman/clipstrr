@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { api } from "~/trpc/react";
+import { parseYouTubeVideo } from "~/lib/youtube";
 
 type PostWizardProps = {
   isOpen: boolean;
@@ -11,6 +12,7 @@ type PostWizardProps = {
 };
 
 type WizardStep = "url" | "timestamp" | "description";
+type PlayerViewMode = "compact" | "theatre";
 
 type YouTubePlayer = {
   destroy: () => void;
@@ -50,6 +52,8 @@ export function PostWizard({
   const [error, setError] = useState<string | undefined>();
   const [previewTime, setPreviewTime] = useState(0);
   const [playerReady, setPlayerReady] = useState(false);
+  const [playerViewMode, setPlayerViewMode] =
+    useState<PlayerViewMode>("compact");
 
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
@@ -158,32 +162,18 @@ export function PostWizard({
     setError(undefined);
     setPreviewTime(0);
     setPlayerReady(false);
-  };
-
-  const extractVideoId = (url: string): string | null => {
-    const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-      /^([a-zA-Z0-9_-]{11})$/,
-    ];
-
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match?.[1]) {
-        return match[1];
-      }
-    }
-
-    return null;
+    setPlayerViewMode("compact");
   };
 
   const handleUrlSubmit = () => {
-    const id = extractVideoId(youtubeUrl);
-    if (!id) {
+    const parsed = parseYouTubeVideo(youtubeUrl);
+    if (!parsed) {
       setError("Invalid YouTube URL. Please try again.");
       return;
     }
 
-    setVideoId(id);
+    setYoutubeUrl(parsed.url);
+    setVideoId(parsed.videoId);
     setError(undefined);
     setStep("timestamp");
   };
@@ -221,7 +211,13 @@ export function PostWizard({
 
   return (
     <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-black/65 p-4">
-      <div className="w-full max-w-3xl overflow-hidden rounded-3xl border border-border/70 bg-surface-800 shadow-2xl shadow-black/40 animate-spring">
+      <div
+        className={`w-full overflow-hidden rounded-3xl border border-border/70 bg-surface-800 shadow-2xl shadow-black/40 animate-spring ${
+          step === "timestamp" && playerViewMode === "theatre"
+            ? "max-w-5xl"
+            : "max-w-3xl"
+        }`}
+      >
         {/* header */}
         <div className="border-b border-border/70 bg-stage-900 px-6 py-4">
           <div className="flex items-center justify-between">
@@ -283,6 +279,21 @@ export function PostWizard({
           {/* step 2: timestamp selection */}
           {step === "timestamp" && videoId && (
             <div className="space-y-6">
+              <div className="flex justify-end">
+                <button
+                  onClick={() =>
+                    setPlayerViewMode((mode) =>
+                      mode === "compact" ? "theatre" : "compact",
+                    )
+                  }
+                  className="btn-press rounded-lg border border-border/80 bg-stage-900 px-3 py-1.5 text-xs text-text-secondary transition-all duration-200 hover:border-primary-300/50 hover:bg-surface-750 hover:text-text-primary"
+                >
+                  {playerViewMode === "theatre"
+                    ? "Compact View"
+                    : "Theatre View"}
+                </button>
+              </div>
+
               {/* video player */}
               <div className="overflow-hidden rounded-2xl">
                 <div className="relative aspect-video w-full bg-gray-900">

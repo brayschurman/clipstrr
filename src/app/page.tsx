@@ -56,7 +56,7 @@ export default function Home() {
         <div className="text-center">
           <div className="mb-4 text-7xl">🎬</div>
           <h1 className="mb-4 text-6xl font-extrabold text-primary-400 sm:text-7xl">
-            This One Part
+            Clipstr<span className="animate-bounce-r">r</span>
           </h1>
           <p className="text-xl text-text-secondary sm:text-2xl">
             Share your favorite YouTube moments 😅

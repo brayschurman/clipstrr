@@ -166,3 +166,21 @@ This is a personal project, but feel free to fork and customize for your own use
 ## License
 
 MIT
+
+## Future Vision: YouTube Archive & Playlist Platform
+
+This One Part is evolving into a personal YouTube archive—a place to curate your favorite videos and discover what others are watching. Think of it as an entirely different interface for YouTube, focused on collections and community.
+
+**Core concept:**
+
+- Your little archive of favorite YouTube videos
+- Create and share playlists (currently called "rooms")
+- Browse other people's curated collections
+- A more social, playlist-centric way to experience YouTube
+
+**Potential changes:**
+
+- Rename "room" to something more fitting (e.g., "playlist", "collection", "archive", "shelf")
+- Emphasize the archival/curation aspect over the ephemeral "room" metaphor
+- Consider discovery features to explore other users' playlists
+- Build out the playlist/collection management experience
