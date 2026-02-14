@@ -1,0 +1,2 @@
+-- Migration already applied (existing auth tables)
+-- This file is kept for migration tracking purposes

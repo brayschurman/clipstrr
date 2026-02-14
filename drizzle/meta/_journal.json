@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1771043454811,
+      "tag": "0000_dark_thing",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771043554811,
+      "tag": "0001_add_room_tables",
+      "breakpoints": true
+    }
+  ]
+}
