@@ -180,7 +180,12 @@ This One Part is evolving into a personal YouTube archive—a place to curate yo
 
 **Potential changes:**
 
-- Rename "room" to something more fitting (e.g., "playlist", "collection", "archive", "shelf")
+- Rename "room" to something more fitting (e.g., "playlist", "collection", "archive", "shelf", "curation")
 - Emphasize the archival/curation aspect over the ephemeral "room" metaphor
 - Consider discovery features to explore other users' playlists
 - Build out the playlist/collection management experience
+
+**Feature ideas:**
+
+- **Persistent Curations**: Save curations to your profile so you can always return to them. View all your curations from your profile page.
+- **Auto-play Experience**: When a clip finishes playing in a curation, automatically start the next clip. Create a seamless, custom viewing experience across multiple YouTube videos—like a personalized mini-documentary or mixtape.
